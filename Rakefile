@@ -27,18 +27,30 @@ class Find
     self.findit( @raw )
   end
   def self.findit(hargs)
-    `find #{hargs}`
+    Find.new(`find #{hargs}`.split("\n"))
   end
-  # def self.|(arg)
-  #   puts "Whatever"
-  # end
+  
+  def initialize(entries)
+    @entries = entries
+  end
+
+  def to_s
+    @entries.join(" ")
+  end
+  
+  def |(other)
+    puts "Whatever #{other}"
+  end
 
 end
 
 
 desc "Run the Unit Tests"
 task :test do |t|
-  puts Find['. -name "*.class"'] 
+  files = Find['. -name "*.class"'] 
+  blah = Find['. -name "*.class"'] | "foo"
+  puts files.class
+  puts "#{files}"
   # puts Find| 2
 end
 
