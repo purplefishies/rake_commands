@@ -51,7 +51,7 @@ class Ls < GlobalCommand ; end
 
 
 # doctest: Can get find to run
-# >> a = Find[". -name *.rb"]
+# >> a = Find['. -name "*.rb"']
 # >> a.to_s 
 # => "./cmd.rb"
 class Find < GlobalCommand; end
