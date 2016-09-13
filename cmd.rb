@@ -64,29 +64,3 @@ class Find < GlobalCommand; end
 
 
 
-# class Find
-#   def self.[]( *args, raw )
-#     @args = args
-#     @raw  = raw
-#     self.runit( @raw )
-#   end
-
-#   def initialize(cmd)
-#     @cmd = cmd
-#   end
-
-#   def self.runit(hargs)
-#     Find.new("find #{hargs}")
-#   end
-
-#   def to_s
-#     @entries = `#{@cmd}`.split("\n")
-#     @entries.join(" ")
-#   end
-  
-#   def |(other)
-#     puts "Whatever #{other}"
-#   end
-# end
-
-
