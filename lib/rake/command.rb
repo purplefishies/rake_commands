@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 
-gem 'rake'
-gem 'chronic'
-require 'byebug'
-
 #
 # This is something
 #
@@ -87,39 +83,16 @@ class ReturnCmd < GlobalCommand
   end
 end
 
-class RunCmd < GlobalCommand
+class SystemCmd < GlobalCommand
+  def initialize(args)
+    super
+    runit()
+  end
   def runit()
     @entries = system("#{self.make_cmd()}")
   end
 end
 
-
-#
-# Main code here
-#
-
-if __FILE__ == $PROGRAM_NAME
-  require 'test/unit'
-
-  class Ls < ReturnCmd 
-    @defaults = { "-a" => 1 }
-  end
-  class Find < GlobalCommand
-    @defaults = { "-01" => nil }
-  end
-  
-  class FindTest < Test::Unit::TestCase
-    def test_ls
-      a = Ls['"*.rb"']
-      assert_equal a.make_cmd.encode("UTF-8") , "ls -a 1 \"*.rb\""
-    end
-    
-    def test_find
-      a = Find["*.rb"]
-      assert_equal a.make_cmd.encode("UTF-8") , "find -01 *.rb"
-    end
-  end
-end
 
 
 
