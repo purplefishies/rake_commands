@@ -1,66 +1,126 @@
+#!/usr/bin/env ruby
 require 'rubygems'
 
 gem 'rake'
 gem 'chronic'
 require 'byebug'
 
+#
+# This is something
+#
+#
+#
 class GlobalCommand
+  @defaults = {"b" => 2}
+  @@cmdattributes = {}
   @@attributes = {
     :message => "Running",
     :name => lambda { |slf| slf.to_s.downcase },
     :logger => 1,
-    :level => nil
+    :level => nil,
   }
-
+  
+  #
+  # Factory constructor
+  #
   def self.[]( *args, raw )
     if args.length % 2 != 0 
       raise "ARGS length must be multiple of 2 "
     end
+    
     tmpargs = Hash[*args]
-    @args = tmpargs
-    @@attributes.each { |i|
-      if tmpargs.has_key?(i)
-        if attributes[i].lambda? 
-          self.class_variable_set("@@#{i}", attributes[i].call( self ) )
-        else
-          self.class_variable_set("@@#{i}", tmpargs[i] )
-        end
+    cmdattributes = {}
+    attributes = {}
+    attributes = @@attributes.dup
+    attributes.keys.each { |i|
+      if attributes[i].class == Proc
+        attributes[i] = attributes[i].call( self )
       end
     }
 
-    @raw = raw
-    self.runit( @raw )
+    @defaults.keys.each { |i| 
+      if i.class == Symbol && attributes.has_key?(i)
+        if @defaults[i].class == Proc
+          attributes[i] = @defaults[i].call( self )
+        else
+          attributes[i] = @defaults[i]
+        end
+      elsif i.class != Symbol
+        cmdattributes[i] = @defaults[i]
+      end
+    }
+
+    self.buildit( attributes:attributes, cmdattributes:cmdattributes, cmd:raw )
   end
 
-  def initialize(cmd)
-    @cmd = cmd
+  #
+  #
+  #
+  def make_cmd()
+    cmd = @attributes[:name] + " "
+    tmp = [@cmdattributes.keys.find_all { |i| @cmdattributes[i].nil? }.map { |i| i }.join(" "),
+           @cmdattributes.keys.find_all { |i| !@cmdattributes[i].nil? }.map { |i| i + " " + @cmdattributes[i].to_s }.join(" "),
+           @cmd].find_all { |i| i != "" }.join(" ")
+    cmd += tmp
+    return cmd
   end
 
-  def self.runit(hargs)
-    self.new("#{self.to_s.downcase} #{hargs}")
+  def initialize(args)
+    @attributes = args[:attributes]
+    @cmdattributes = args[:cmdattributes]
+    @cmd = args[:cmd]
   end
 
-  def to_s
-    @entries = `#{@cmd}`.split("\n")
-    @entries.join(" ")
+  def self.buildit(hargs)
+    self.new( hargs )
   end
-
 
 end
 
-# doctest: Can get ls to run
-# >> a = Ls["*.rb"]
-# >> a.to_s 
-# => "cmd.rb"
-class Ls < GlobalCommand ; end
+class ReturnCmd < GlobalCommand
+  def to_s
+    runit()
+  end
+  def runit()
+    @entries = `#{self.make_cmd()}`.split("\n")
+    @entries.join(" ")
+  end
+end
+
+class RunCmd < GlobalCommand
+  def runit()
+    @entries = system("#{self.make_cmd()}")
+  end
+end
 
 
+#
+# Main code here
+#
 
-# doctest: Can get find to run
-# >> a = Find['. -name "*.rb"']
-# >> a.to_s 
-# => "./cmd.rb"
-class Find < GlobalCommand; end
+if __FILE__ == $PROGRAM_NAME
+  require 'test/unit'
+
+  class Ls < ReturnCmd 
+    @defaults = { "-a" => 1 }
+  end
+  class Find < GlobalCommand
+    @defaults = { "-01" => nil }
+  end
+  
+  class FindTest < Test::Unit::TestCase
+    def test_ls
+      a = Ls['"*.rb"']
+      assert_equal a.make_cmd.encode("UTF-8") , "ls -a 1 \"*.rb\""
+    end
+    
+    def test_find
+      a = Find["*.rb"]
+      assert_equal a.make_cmd.encode("UTF-8") , "find -01 *.rb"
+    end
+  end
+end
+
 
 
 
