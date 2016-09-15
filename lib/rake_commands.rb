@@ -7,7 +7,7 @@ require 'rubygems'
 #
 #
 class GlobalCommand
-  @defaults = {"b" => 2}
+  @defaults = {}
   @@cmdattributes = {}
   @@attributes = {
     :message => "Running",

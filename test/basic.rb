@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'rake/command'
+require 'rake_commands'
 
 class Ls < ReturnCmd 
   @defaults = { "-a" => 1 }
@@ -10,6 +10,7 @@ end
 class TouchNew < SystemCmd
   @defaults = {:name => "touch" }
 end
+class Touch < SystemCmd ; end
 
 class FindTest < Test::Unit::TestCase
   def test_ls
@@ -27,6 +28,12 @@ class FindTest < Test::Unit::TestCase
     assert_equal a.make_cmd.encode("UTF-8") , "touch foo"
     assert_true File.exists?("foo")
   end
+
+  def test_touch
+    a = Touch["foo"]
+    assert_true File.exists?("foo")
+  end
+
   def teardown
     File.unlink("foo") if File.exists?("foo")
   end
