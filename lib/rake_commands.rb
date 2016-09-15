@@ -23,7 +23,7 @@ class GlobalCommand
     if args.length % 2 != 0 
       raise "ARGS length must be multiple of 2 "
     end
-    
+    @defaults ||= {}
     tmpargs = Hash[*args]
     cmdattributes = {}
     attributes = {}
