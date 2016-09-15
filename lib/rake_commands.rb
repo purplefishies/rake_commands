@@ -78,8 +78,8 @@ class ReturnCmd < GlobalCommand
     runit()
   end
   def runit()
-    @entries = `#{self.make_cmd()}`.split("\n")
-    @entries.join(" ")
+    @entries = `#{self.make_cmd()} 2>&1`.split("\n")
+    return @entries.join(" ")
   end
 end
 
